@@ -76,7 +76,7 @@ void loop() {
 		case 0:
 			flag = 0;
 			j = 0;
-			ledDo(range/(float)maxRange*255);
+			ledDo(pow(range/(float)maxRange, 2)*255);
 			break;
 		case 1:
 			flash(maxRange - range);
