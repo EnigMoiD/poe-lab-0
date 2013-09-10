@@ -2,8 +2,12 @@ int ledPins[] = {9, 10, 11, 5, 6};
 int pinCount = 5;
 int buttonPin = 8;
 
-int rangePin = 3;
-int range = 0;
+int rangePin = A3;
+int rIndex = 0;
+const int numRanges = 10;
+int ranges[numRanges];
+int total = 0;
+const unsigned maxRange = 600;
 
 int ledStateCount = 4;
 
@@ -24,7 +28,16 @@ int j = 0;
 int direction_flag = 0;
 
 int getRange() {
-	return analogRead(rangePin); 
+	total -= ranges[rIndex];
+	int read = analogRead(A3);
+	// if (read < 80) read = 150;
+	ranges[rIndex] = read;
+	total += ranges[rIndex];
+	rIndex = (rIndex+1)%numRanges;
+
+	Serial.println(total/numRanges);
+
+	return total/numRanges;
 }
 
 void setup() {
@@ -33,10 +46,16 @@ void setup() {
 	}
 	pinMode(buttonPin, INPUT);
 	pinMode(rangePin, INPUT);
+
+	for (int i = 0; i < numRanges; i++) {
+		ranges[i] = 0;
+	}
+
+	Serial.begin(9600);
 }
 
 void loop() {
-	range = getRange();
+	int range = getRange();
 
 	long currentMillis = millis();
 	if (lastButtonState != buttonState) {
@@ -57,17 +76,17 @@ void loop() {
 		case 0:
 			flag = 0;
 			j = 0;
-			ledDo(range);
+			ledDo(range/(float)maxRange*255);
 			break;
 		case 1:
-			flash(range);
+			flash(maxRange - range);
 			break;
 		case 2:
 			if (flag == 0) {
 				ledDo(0);
 				flag = 1;
 			}
-			bounce(range/4);
+			bounce(maxRange - range);
 		break;
 		case 3:
 			ledDo(0);
