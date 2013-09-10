@@ -1,6 +1,9 @@
-int ledPins[] = {9, 10, 11, 12, 13};
+int ledPins[] = {9, 10, 11, 5, 6};
 int pinCount = 5;
 int buttonPin = 8;
+
+int rangePin = 3;
+int range = 0;
 
 int ledStateCount = 4;
 
@@ -20,18 +23,25 @@ int mod(int a, int b) {
 int j = 0;
 int direction_flag = 0;
 
+int getRange() {
+	return analogRead(rangePin); 
+}
+
 void setup() {
 	for (int i = 0; i < pinCount; i++) {
-		pinMode(ledPins[i], OUTPUT);		
+		pinMode(ledPins[i], OUTPUT);
 	}
 	pinMode(buttonPin, INPUT);
+	pinMode(rangePin, INPUT);
 }
 
 void loop() {
+	range = getRange();
+
 	long currentMillis = millis();
 	if (lastButtonState != buttonState) {
 		if (lastButtonState == LOW && buttonState == HIGH) {
-			buttonTime = millis();			
+			buttonTime = millis();
 		}
 
 		else if (lastButtonState == HIGH && buttonState == LOW) {
@@ -47,20 +57,20 @@ void loop() {
 		case 0:
 			flag = 0;
 			j = 0;
-			ledDo(HIGH);
+			ledDo(range);
 			break;
 		case 1:
-			flash(100);
+			flash(range);
 			break;
 		case 2:
 			if (flag == 0) {
-				ledDo(LOW);
+				ledDo(0);
 				flag = 1;
 			}
-			bounce(100);
+			bounce(range/4);
 		break;
 		case 3:
-			ledDo(LOW);
+			ledDo(0);
 			break;
 	}
 
@@ -70,7 +80,7 @@ void loop() {
 
 void ledDo(int input) {
 	for (int i = 0; i < pinCount; i++) {
-		digitalWrite(ledPins[i], input);
+		analogWrite(ledPins[i], input);
 	}
 }
 
@@ -116,7 +126,7 @@ void forward_cycle() {
 	digitalWrite(ledPins[j], HIGH);
 	digitalWrite(ledPins[mod(j-1, pinCount)], LOW);
 	j++;
-	previousTime = millis();	
+	previousTime = millis();
 }
 
 void backward_cycle() {
